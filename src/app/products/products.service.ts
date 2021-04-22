@@ -3,6 +3,7 @@ import { DynamoDBHelper } from '../../helpers/dynamodb.helper'
 import { CreateProductDto } from './dto/create-product.dto'
 import { UpdateProductDto } from './dto/update-product.dto'
 import { v4 as uuid } from 'uuid'
+import { IUpdateDynamoItem } from '../../helpers/dynamodb.interface'
 
 @Injectable()
 export class ProductsService {
@@ -28,8 +29,31 @@ export class ProductsService {
     return await this.dynamoDbHelper.findOne(this.tableName, { _id: { S: id } })
   }
 
-  update(id: string, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`
+  async update(id: string, data: UpdateProductDto) {
+    const attributeNames = {
+      '#name': 'name',
+      '#price': 'price',
+    }
+
+    const attributeValues = {
+      ':name': { S: data.name },
+      ':price': { N: data.price },
+    }
+
+    const key = {
+      _id: { S: id },
+    }
+
+    const updateExpression = 'SET #name = :name, #price = :price'
+
+    const options: IUpdateDynamoItem = {
+      attributeNames,
+      attributeValues,
+      key,
+      updateExpression,
+    }
+
+    return await this.dynamoDbHelper.update(this.tableName, options)
   }
 
   remove(id: string) {
