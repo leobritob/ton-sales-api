@@ -17,11 +17,11 @@ export class ProductsService {
       price: { N: data.price },
     }
 
-    return await this.dynamoDbHelper.putItem(this.tableName, Item)
+    return await this.dynamoDbHelper.create(this.tableName, Item)
   }
 
   async findAll() {
-    return await this.dynamoDbHelper.scan(this.tableName)
+    return await this.dynamoDbHelper.findAll(this.tableName)
   }
 
   findOne(id: number) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import * as AWS from 'aws-sdk'
-import { PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb'
+import { AttributeMap, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb'
 
 @Injectable()
 export class DynamoDBHelper {
@@ -17,13 +17,13 @@ export class DynamoDBHelper {
     })
   }
 
-  async scan(tableName: string) {
+  async findAll(tableName: string) {
     let result = []
 
     try {
       const rows = await this.dynamoDB.scan({ TableName: tableName }).promise()
 
-      result = this.itemsTransform(rows.Items)
+      result = this.itemTransformList(rows.Items)
     } catch (e) {
       console.log('scan error: ' + e.message)
     }
@@ -31,28 +31,47 @@ export class DynamoDBHelper {
     return result
   }
 
-  async putItem(tableName: string, item: PutItemInputAttributeMap) {
+  async create(tableName: string, item: PutItemInputAttributeMap) {
     return new Promise((resolve, reject) => {
       const params = { TableName: tableName, Item: item }
 
       this.dynamoDB.putItem(params, (err, data) => {
         if (err) return reject(err)
 
-        return resolve(this.itemsTransform([item])[0])
+        return resolve(this.itemTransform(item))
       })
     })
   }
 
-  itemsTransform(items: AWS.DynamoDB.ItemList) {
-    return items.map((item) => {
-      let result = {}
+  async findOne(tableName: string, key: any, projectionExpression: string) {
+    const params = {
+      TableName: tableName,
+      Key: key,
+      ProjectionExpression: projectionExpression,
+    }
 
-      const keys = Object.keys(item)
-      keys.forEach((key) => {
-        result[key] = Object.values(item[key])[0]
+    return new Promise((resolve, reject) => {
+      this.dynamoDB.getItem(params, (err, data) => {
+        if (err) return reject(err)
+
+        return resolve(this.itemTransform(data.Item))
       })
-
-      return result
     })
+  }
+
+  itemTransformList(items: AWS.DynamoDB.ItemList) {
+    return items.map(this.itemTransform)
+  }
+
+  itemTransform(item: AttributeMap) {
+    const keys = Object.keys(item)
+
+    let result = {}
+
+    keys.forEach((key) => {
+      result[key] = Object.values(item[key])[0]
+    })
+
+    return result
   }
 }
