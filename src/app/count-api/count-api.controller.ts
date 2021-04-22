@@ -7,13 +7,13 @@ import { CountApiService } from './count-api.service'
 export class CountApiController {
   constructor(private readonly countApiService: CountApiService) {}
 
-  @Post('app/hits')
+  @Post('app')
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Hit on App' })
   async newAppHit() {
     return await this.countApiService.newAppHit('app')
   }
 
-  @Get('app/hits')
+  @Get('app')
   @ApiResponse({ status: HttpStatus.OK, description: 'Get the count number of hits on App' })
   async getAppHits() {
     return await this.countApiService.getAppHits('app')
