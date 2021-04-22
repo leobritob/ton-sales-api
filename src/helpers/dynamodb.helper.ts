@@ -43,11 +43,11 @@ export class DynamoDBHelper {
     })
   }
 
-  async findOne(tableName: string, key: any, projectionExpression: string) {
-    const params = {
-      TableName: tableName,
-      Key: key,
-      ProjectionExpression: projectionExpression,
+  async findOne(tableName: string, key: any, projectionExpression?: string) {
+    const params: any = { TableName: tableName, Key: key }
+
+    if (projectionExpression) {
+      params.ProjectionExpression = projectionExpression
     }
 
     return new Promise((resolve, reject) => {

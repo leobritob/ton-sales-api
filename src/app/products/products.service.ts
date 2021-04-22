@@ -24,15 +24,15 @@ export class ProductsService {
     return await this.dynamoDbHelper.findAll(this.tableName)
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`
+  async findOne(id: string) {
+    return await this.dynamoDbHelper.findOne(this.tableName, { _id: { S: id } })
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
+  update(id: string, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} product`
   }
 }
