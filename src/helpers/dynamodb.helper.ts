@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import * as AWS from 'aws-sdk'
+import { PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb'
 
 @Injectable()
 export class DynamoDBHelper {
@@ -28,6 +29,18 @@ export class DynamoDBHelper {
     }
 
     return result
+  }
+
+  async putItem(tableName: string, item: PutItemInputAttributeMap) {
+    return new Promise((resolve, reject) => {
+      const params = { TableName: tableName, Item: item }
+
+      this.dynamoDB.putItem(params, (err, data) => {
+        if (err) return reject(err)
+
+        return resolve(this.itemsTransform([item])[0])
+      })
+    })
   }
 
   itemsTransform(items: AWS.DynamoDB.ItemList) {
