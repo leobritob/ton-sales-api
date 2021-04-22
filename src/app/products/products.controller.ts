@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, HttpCode, HttpStatus } from '@nestjs/common'
 import { ProductsService } from './products.service'
 import { CreateProductDto } from './dto/create-product.dto'
 import { UpdateProductDto } from './dto/update-product.dto'
@@ -8,27 +8,29 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() body: CreateProductDto) {
-    return this.productsService.create(body)
+  async create(@Body() body: CreateProductDto) {
+    return await this.productsService.create(body)
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll()
+  async findAll() {
+    return await this.productsService.findAll()
   }
 
   @Get(':id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.productsService.findOne(id)
+  async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.productsService.findOne(id)
   }
 
   @Patch(':id')
-  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() body: UpdateProductDto) {
-    return this.productsService.update(id, body)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() body: UpdateProductDto) {
+    return await this.productsService.update(id, body)
   }
 
   @Delete(':id')
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.productsService.remove(id)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.productsService.remove(id)
   }
 }

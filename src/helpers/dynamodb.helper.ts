@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import * as AWS from 'aws-sdk'
-import { AttributeMap, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb'
+import { AttributeMap, Key, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb'
 import { IUpdateDynamoItem } from './dynamodb.interface'
 
 @Injectable()
@@ -33,9 +33,12 @@ export class DynamoDBHelper {
   }
 
   async create(tableName: string, item: PutItemInputAttributeMap) {
-    return new Promise((resolve, reject) => {
-      const params = { TableName: tableName, Item: item }
+    const params = {
+      TableName: tableName,
+      Item: item,
+    }
 
+    return new Promise((resolve, reject) => {
       this.dynamoDB.putItem(params, (err, data) => {
         if (err) return reject(err)
 
@@ -45,11 +48,12 @@ export class DynamoDBHelper {
   }
 
   async findOne(tableName: string, key: any, projectionExpression?: string) {
-    const params: any = { TableName: tableName, Key: key }
-
-    if (projectionExpression) {
-      params.ProjectionExpression = projectionExpression
+    const params: any = {
+      TableName: tableName,
+      Key: key,
     }
+
+    if (projectionExpression) params.ProjectionExpression = projectionExpression
 
     return new Promise((resolve, reject) => {
       this.dynamoDB.getItem(params, (err, data) => {
@@ -60,7 +64,7 @@ export class DynamoDBHelper {
     })
   }
 
-  async update(tableName: string, options: IUpdateDynamoItem) {
+  async updateItem(tableName: string, options: IUpdateDynamoItem) {
     const params = {
       ExpressionAttributeNames: options.attributeNames,
       ExpressionAttributeValues: options.attributeValues,
@@ -79,11 +83,28 @@ export class DynamoDBHelper {
     })
   }
 
+  async deleteItem(tableName: string, key: Key) {
+    const params = {
+      Key: key,
+      TableName: tableName,
+    }
+
+    return new Promise((resolve, reject) => {
+      this.dynamoDB.deleteItem(params, (err, data) => {
+        if (err) return reject(err)
+
+        return resolve(data)
+      })
+    })
+  }
+
   itemTransformList(items: AWS.DynamoDB.ItemList) {
     return items.map(this.itemTransform)
   }
 
   itemTransform(item: AttributeMap) {
+    if (!item) return null
+
     const keys = Object.keys(item)
 
     let result = {}

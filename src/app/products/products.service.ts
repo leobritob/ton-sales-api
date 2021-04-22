@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { DynamoDBHelper } from '../../helpers/dynamodb.helper'
 import { CreateProductDto } from './dto/create-product.dto'
 import { UpdateProductDto } from './dto/update-product.dto'
@@ -26,10 +26,16 @@ export class ProductsService {
   }
 
   async findOne(id: string) {
-    return await this.dynamoDbHelper.findOne(this.tableName, { _id: { S: id } })
+    const product = await this.dynamoDbHelper.findOne(this.tableName, { _id: { S: id } })
+
+    if (!product) throw new NotFoundException()
+
+    return product
   }
 
   async update(id: string, data: UpdateProductDto) {
+    await this.findOne(id)
+
     const attributeNames = {
       '#name': 'name',
       '#price': 'price',
@@ -53,10 +59,24 @@ export class ProductsService {
       updateExpression,
     }
 
-    return await this.dynamoDbHelper.update(this.tableName, options)
+    try {
+      return await this.dynamoDbHelper.updateItem(this.tableName, options)
+    } catch (e) {
+      throw new BadRequestException(e.message)
+    }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} product`
+  async remove(id: string) {
+    await this.findOne(id)
+
+    const key = {
+      _id: { S: id },
+    }
+
+    try {
+      return await this.dynamoDbHelper.deleteItem(this.tableName, key)
+    } catch (e) {
+      throw new BadRequestException(e.message)
+    }
   }
 }
