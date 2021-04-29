@@ -13,9 +13,11 @@ before_install:
   - pyenv global 3.7.1
   - pip install -U pip
   - pip install awscli
+  - aws configure set aws_access_key_id $AWS_KEY_ID
+  - aws configure set aws_secret_access_key $AWS_SECRET_KEY
 
 install:
-  - echo "[default] aws_access_key_id = $AWS_KEY_ID aws_secret_access_key = $AWS_SECRET_KEY " >> ~/.aws/config
+  - echo "no install"
 
 before_script:
   - echo "no tests"
