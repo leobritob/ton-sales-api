@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+  - 14
+
+services:
+  - docker
+
+# Pre-testing installs
+install:
+  - echo "nothing needs to be installed"
+
+# Scripts to be run such as tests
+before_script:
+  - echo "no tests"
+
+script:
+  - docker --version # print the version for logging
+  - docker build -t simple-node .
+  - docker tag simple-node $ECR_REPOSITORY_URL:1.0.0
+
+# Tasks to perform after the process is successful. Formatting the Docker username and password as below enables you to programmatically log in without having the password exposed in logs.
+after_success:
+  - echo "docker login --username AWS --password $ECR_TOKEN 477539478664.dkr.ecr.sa-east-1.amazonaws.com"
+  - docker push $ECR_REPOSITORY_URL:1.0.0
+
