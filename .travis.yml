@@ -5,21 +5,27 @@ node_js:
 services:
   - docker
 
-# Pre-testing installs
+env:
+  global:
+    - PATH=$HOME/.local/bin:$PATH
+
+before_install:
+  - pyenv global 3.7.1
+  - pip install -U pip
+  - pip install awscli
+
 install:
   - echo "nothing needs to be installed"
 
-# Scripts to be run such as tests
 before_script:
   - echo "no tests"
 
 script:
   - docker --version # print the version for logging
-  - docker build -t ton-sales-api:1.0.0 .
-  - docker tag ton-sales-api:1.0.0 $ECR_REPOSITORY_URL/ton-sales-api:1.0.0
+  - docker build -t ton-sales-api:$$TRAVIS_BUILD_NUMBER .
+  - docker tag ton-sales-api:$$TRAVIS_BUILD_NUMBER $ECR_REPOSITORY_URL/ton-sales-api:$$TRAVIS_BUILD_NUMBER
 
-# Tasks to perform after the process is successful. Formatting the Docker username and password as below enables you to programmatically log in without having the password exposed in logs.
 after_success:
-  - echo "docker login --username AWS --password $ECR_TOKEN $ECR_REPOSITORY_URL"
-  - docker push $ECR_REPOSITORY_URL/ton-sales-api:1.0.0
-
+  # - echo "docker login --username AWS --password $ECR_TOKEN $ECR_REPOSITORY_URL"
+  - echo "aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin $ECR_REPOSITORY_URL"
+  - docker push $ECR_REPOSITORY_URL/ton-sales-api:$$TRAVIS_BUILD_NUMBER
