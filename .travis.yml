@@ -27,9 +27,8 @@ before_script:
 script:
   - docker --version # print the version for logging
   - docker build -t ton-sales-api:$TRAVIS_BUILD_NUMBER .
-  - docker tag ton-sales-api:$TRAVIS_BUILD_NUMBER $ECR_REPOSITORY_URL/ton-sales-api:$TRAVIS_BUILD_NUMBER
+  - docker tag ton-sales-api:$TRAVIS_BUILD_NUMBER 477539478664.dkr.ecr.sa-east-1.amazonaws.com/ton-sales-api:$TRAVIS_BUILD_NUMBER
 
 after_success:
-  # - echo "docker login --username AWS --password $ECR_TOKEN $ECR_REPOSITORY_URL"
-  - echo "aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin $ECR_REPOSITORY_URL"
-  - docker push $ECR_REPOSITORY_URL/ton-sales-api:$TRAVIS_BUILD_NUMBER
+  - echo "aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin 477539478664.dkr.ecr.sa-east-1.amazonaws.com"
+  - docker push 477539478664.dkr.ecr.sa-east-1.amazonaws.com/ton-sales-api:$TRAVIS_BUILD_NUMBER
